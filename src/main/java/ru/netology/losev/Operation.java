@@ -1,15 +1,16 @@
 package ru.netology.losev;
-class Operation implements ConsolePrintable {
+
+import java.io.Serializable;
+
+public class Operation implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static int counter = 0;
 
     private int id;
     private double amount;
     private boolean isTransfer;
     private String date;
-
-    public Operation() {
-        this.id = ++counter;
-    }
 
     public Operation(double amount, boolean isTransfer, String date) {
         this.id = ++counter;
@@ -22,39 +23,25 @@ class Operation implements ConsolePrintable {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public double getAmount() {
         return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
     }
 
     public boolean isTransfer() {
         return isTransfer;
     }
 
-    public void setTransfer(boolean transfer) {
-        isTransfer = transfer;
-    }
-
     public String getDate() {
         return date;
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
     @Override
-    public void print() {
-        System.out.println("Operation ID: " + id);
-        System.out.println("Amount: " + amount);
-        System.out.println("Is transfer: " + isTransfer);
-        System.out.println("Date: " + date);
+    public String toString() {
+        return "Operation{" +
+                "id=" + id +
+                ", amount=" + amount +
+                ", isTransfer=" + isTransfer +
+                ", date='" + date + '\'' +
+                '}';
     }
 }

@@ -1,5 +1,7 @@
+// Main.java
 package ru.netology.losev;
 
+import java.io.*;
 import java.util.Scanner;
 
 public class Main {
@@ -10,12 +12,26 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         int transactionCount = 0;
 
-        Operation[] operations = new Operation[MAX_TRANSACTIONS];
-        Customer[] customers = new Customer[MAX_CUSTOMERS];
-        int[][] statement = new int[MAX_CUSTOMERS][MAX_TRANSACTIONS];
+        OperationData operationData = null;
+
+        // Десериализация данных
+        try {
+            FileInputStream fileIn = new FileInputStream("test.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            operationData = (OperationData) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (operationData == null) {
+            operationData = new OperationData();
+        }
 
         while (transactionCount < MAX_TRANSACTIONS) {
-            operations[transactionCount] = createOperationFromConsole(scanner);
+            Operation operation = operationData.createOperationFromConsole(scanner);
+            operationData.addOperation(operation);
 
             System.out.println("Выберите клиента или создайте нового:");
             System.out.println("1. Выбрать существующего клиента");
@@ -28,56 +44,38 @@ public class Main {
                 int customerId = scanner.nextInt();
                 scanner.nextLine();
 
-                if (customerId >= 0 && customerId < customers.length && customers[customerId] != null) {
-                    statement[customerId][transactionCount] = operations[transactionCount].getId();
+                if (customerId >= 0 && customerId < operationData.getCustomers().length && operationData.getCustomers()[customerId] != null) {
+                    operationData.addStatement(customerId, operation.getId());
                 } else {
                     System.out.println("Клиент с указанным ID не найден.");
                 }
             } else if (choice == 2) {
-                Customer newCustomer = createCustomerFromConsole(scanner);
-                customers[newCustomer.getId()] = newCustomer;
-                statement[newCustomer.getId()][transactionCount] = operations[transactionCount].getId();
+                Customer newCustomer = operationData.createCustomerFromConsole(scanner);
+                operationData.addCustomer(newCustomer);
+                operationData.addStatement(newCustomer.getId(), operation.getId());
             }
 
             transactionCount++;
         }
 
-        // Вывод операций клиента
+        // Сериализация данных
+        try {
+            FileOutputStream fileOut = new FileOutputStream("test.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(operationData);
+            out.close();
+            fileOut.close();
+            System.out.println("Данные успешно сохранены.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         System.out.println("Введите ID клиента, чтобы вывести его операции:");
         int clientId = scanner.nextInt();
         scanner.nextLine();
-        Customer.getOperations(clientId, operations, statement);
+        Operation[] clientOperations = operationData.getOperations();
 
         scanner.close();
-    }
-
-    public static Operation createOperationFromConsole(Scanner scanner) {
-        System.out.print("Введите сумму транзакции: ");
-        double amount = scanner.nextDouble();
-        scanner.nextLine();
-
-        System.out.print("Транзакция является переводом? (true/false): ");
-        boolean isTransfer = scanner.nextBoolean();
-        scanner.nextLine();
-
-        System.out.print("Введите дату транзакции: ");
-        String date = scanner.nextLine();
-
-        return new Operation(amount, isTransfer, date);
-    }
-
-    public static Customer createCustomerFromConsole(Scanner scanner) {
-        System.out.print("Введите ID клиента:");
-        int id = scanner.nextInt();
-        scanner.nextLine(); // Очистка буфера
-
-        System.out.print("Введите имя клиента:");
-        String name = scanner.nextLine();
-
-        System.out.print("Введите сумму клиента:");
-        double amount = scanner.nextDouble();
-        scanner.nextLine(); // Очистка буфера
-
-        return new Customer(id, name, amount);
     }
 }

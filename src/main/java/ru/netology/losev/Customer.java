@@ -1,10 +1,13 @@
 package ru.netology.losev;
-class Customer {
+
+import java.io.Serializable;
+
+public class Customer implements Serializable, ConsolePrintable {
+    private static final long serialVersionUID = 1L;
+
     private int id;
     private String name;
     private double amount;
-
-    public Customer() {}
 
     public Customer(int id, String name, double amount) {
         this.id = id;
@@ -16,32 +19,25 @@ class Customer {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", amount=" + amount +
+                '}';
     }
 
-    public static void getOperations(int clientId, Operation[] operations, int[][] statement) {
-        System.out.println("Операции клиента с ID " + clientId + ":");
-        int[] clientTransactions = statement[clientId];
-        for (int i = 0; i < clientTransactions.length; i++) {
-            int operationId = clientTransactions[i];
-            operations[operationId - 1].print();
-        }
+    @Override
+    public void print() {
+        System.out.println(this);
     }
 }
